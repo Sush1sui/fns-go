@@ -23,6 +23,6 @@ func PingServerLoop(serverURL string) {
 			fmt.Printf("Server returned non-200 status code: %d\n", resp.StatusCode)
 			continue
 		}
-		fmt.Printf("Server is reachable, Status:%s\nContent: ", resp.Status)
+		fmt.Printf("Server is reachable, Status:%s\n", resp.Status)
 	}
 }
