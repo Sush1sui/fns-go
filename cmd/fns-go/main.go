@@ -38,12 +38,12 @@ func main() {
 	addr := fmt.Sprintf(":%s", cfg.ServerPort)
 	router := routes.NewRouter()
 	fmt.Printf("Server listening on Port:%s\n", cfg.ServerPort)
-	bot.StartBot()
+	
 
 	err = http.ListenAndServe(addr, router)
 	if err != nil {
 		panic(err)
 	}
-
+	bot.StartBot()
 	helpers.PingServerLoop(cfg.ServerURL)
 }
