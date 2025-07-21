@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/Sush1sui/fns-go/internal/bot"
+	"github.com/Sush1sui/fns-go/internal/bot/helpers"
 	"github.com/Sush1sui/fns-go/internal/config"
 	"github.com/Sush1sui/fns-go/internal/repository"
 	"github.com/Sush1sui/fns-go/internal/repository/mongodb"
@@ -29,7 +30,7 @@ func main() {
 	stickyCollection := mongoClient.Database(os.Getenv("MONGODB_NAME")).Collection(os.Getenv("MONGODB_STICKY_CHANNELS_COLLECTION"))
 
 	repository.StickyService = repository.StickyServiceType{
-		DBClient: mongodb.MongoClient{
+		DBClient: &mongodb.MongoClient{
 			Client: stickyCollection,
 		},
 	}
@@ -38,8 +39,11 @@ func main() {
 	router := routes.NewRouter()
 	fmt.Printf("Server listening on Port:%s\n", cfg.ServerPort)
 	bot.StartBot()
+
 	err = http.ListenAndServe(addr, router)
 	if err != nil {
 		panic(err)
 	}
+
+	helpers.PingServerLoop(cfg.ServerURL)
 }

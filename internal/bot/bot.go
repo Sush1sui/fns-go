@@ -63,3 +63,4 @@ func StartBot() {
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 	<-sc
 }
+

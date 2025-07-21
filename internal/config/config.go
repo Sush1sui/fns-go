@@ -16,6 +16,7 @@ type Config struct {
 	DiscordToken string
 	ServerPort   string
 	AppID        string
+	ServerURL    string
 }
 
 // New loads configuration from environment variables
@@ -40,10 +41,13 @@ func New() (*Config, error) {
 		port = "5469" // Default port
 	}
 
+	serverURL := os.Getenv("SERVER_URL")
+
 	return &Config{
 		DiscordToken: token,
 		AppID:        appID,
 		ServerPort:   port,
+		ServerURL:    serverURL,
 	}, nil
 }
 
