@@ -23,7 +23,7 @@ type Config struct {
 func New() (*Config, error) {
 	// In development, load .env file. In production, env vars are set directly.
 	if err := godotenv.Load(); err != nil {
-		panic("Error loading .env file")
+		fmt.Println("Error loading .env file")
 	}
 
 	token := os.Getenv("bot_token")
