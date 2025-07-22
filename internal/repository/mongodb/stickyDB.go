@@ -9,7 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
-func (c MongoClient) InitializeStickyChannels() error {
+func (c *MongoClient) InitializeStickyChannels() error {
 	res, err := c.GetAllStickyChannels()
 	if err != nil {
 		return err
@@ -21,7 +21,7 @@ func (c MongoClient) InitializeStickyChannels() error {
 	return nil
 }
 
-func (c MongoClient) GetAllStickyChannels() ([]*model.StickyChannel, error) {
+func (c *MongoClient) GetAllStickyChannels() ([]*model.StickyChannel, error) {
 	var channels []*model.StickyChannel // Initialize an empty slice to hold the channels
 
 	// Use the Find method to retrieve all sticky channels from the MongoDB collection
@@ -42,7 +42,7 @@ func (c MongoClient) GetAllStickyChannels() ([]*model.StickyChannel, error) {
 	return channels, nil // Return the slice of StickyChannel pointers
 }
 
-func (c MongoClient) GetStickyChannel(channelID string) *model.StickyChannel {
+func (c *MongoClient) GetStickyChannel(channelID string) *model.StickyChannel {
 	if channelID == "" {
 		return nil // Return nil if the channelID is empty
 	}
@@ -58,7 +58,7 @@ func (c MongoClient) GetStickyChannel(channelID string) *model.StickyChannel {
 	return &channel // Return the found StickyChannel
 }
 
-func (c MongoClient) CreateStickyChannel(channelID, stickyMessage string) (string, error) {
+func (c *MongoClient) CreateStickyChannel(channelID, stickyMessage string) (string, error) {
 	if channelID == "" {
 		return "", fmt.Errorf("channelID cannot be empty")
 	}
@@ -84,7 +84,7 @@ func (c MongoClient) CreateStickyChannel(channelID, stickyMessage string) (strin
 	return result.InsertedID.(bson.ObjectID).Hex(), nil // Return the ID of the created StickyChannel
 }
 
-func (c MongoClient) GetRecentPostMessageId(channelId string) (string, error) {
+func (c *MongoClient) GetRecentPostMessageId(channelId string) (string, error) {
 	if channelId == "" {
 		return "", fmt.Errorf("channelId cannot be empty")
 	}
@@ -103,7 +103,7 @@ func (c MongoClient) GetRecentPostMessageId(channelId string) (string, error) {
 	return channel.RecentPostMessageId, nil // Return the RecentPostMessageId
 }
 
-func (c MongoClient) UpdateStickyMessageId(channelId, lastMessageId, recentPostMessageId string) (*model.StickyChannel, error) {
+func (c *MongoClient) UpdateStickyMessageId(channelId, lastMessageId, recentPostMessageId string) (*model.StickyChannel, error) {
 	if channelId == "" {
 		return nil, fmt.Errorf("channelId cannot be empty")
 	}
@@ -128,7 +128,7 @@ func (c MongoClient) UpdateStickyMessageId(channelId, lastMessageId, recentPostM
 	return &updatedChannel, nil
 }
 
-func (c MongoClient) SetStickyMessageId(channelId, stickyMessageId string) (*model.StickyChannel, error) {
+func (c *MongoClient) SetStickyMessageId(channelId, stickyMessageId string) (*model.StickyChannel, error) {
 	if channelId == "" {
 		return nil, fmt.Errorf("channelId cannot be empty")
 	}
@@ -152,7 +152,7 @@ func (c MongoClient) SetStickyMessageId(channelId, stickyMessageId string) (*mod
 	return &updatedChannel, nil
 }
 
-func (c MongoClient) DeleteStickyChannel(channelId string) (int, error) {
+func (c *MongoClient) DeleteStickyChannel(channelId string) (int, error) {
 	if channelId == "" {
 		return 0, fmt.Errorf("channelId cannot be empty")
 	}
@@ -172,7 +172,7 @@ func (c MongoClient) DeleteStickyChannel(channelId string) (int, error) {
 	return int(result.DeletedCount), nil // Return the number of deleted channels
 }
 
-func (c MongoClient) DeleteAllStickyChannels() (int, error) {
+func (c *MongoClient) DeleteAllStickyChannels() (int, error) {
 	result, err := c.Client.DeleteMany(context.Background(), bson.M{})
 	if err != nil {
 		return 0, fmt.Errorf("error deleting all sticky channels: %v", err)

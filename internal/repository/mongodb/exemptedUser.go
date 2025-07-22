@@ -10,7 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
-func (c MongoClient) ExemptUserVanity(userID string) (bool, error) {
+func (c *MongoClient) ExemptUserVanity(userID string) (bool, error) {
 	if userID == "" {
 		return false, fmt.Errorf("userID cannot be empty")
 	}
@@ -39,7 +39,7 @@ func (c MongoClient) ExemptUserVanity(userID string) (bool, error) {
 	return true, nil
 }
 
-func (c MongoClient) RemoveExemptedUser(userID string) (int, error) {
+func (c *MongoClient) RemoveExemptedUser(userID string) (int, error) {
 	if userID == "" {
 		return 0, fmt.Errorf("userID cannot be empty")
 	}
@@ -52,7 +52,7 @@ func (c MongoClient) RemoveExemptedUser(userID string) (int, error) {
 	return int(res.DeletedCount), nil
 }
 
-func (c MongoClient) GetAllExemptedUsers() ([]*model.ExemptedUser, error) {
+func (c *MongoClient) GetAllExemptedUsers() ([]*model.ExemptedUser, error) {
 	cursor, err := c.Client.Find(context.Background(), bson.M{})
 	if err != nil {
 		return nil, fmt.Errorf("error fetching exempted users: %v", err)

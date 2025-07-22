@@ -61,6 +61,14 @@ func StartBot() {
 		}
 	}()
 
+	// initialize nickname requests
+	go func() {
+		err := repository.NicknameRequestService.DBClient.InitializeNicknameRequests(sess)
+		if err != nil {
+			fmt.Println("Error initializing nickname requests:", err)
+		}
+	}()
+
 	err = repository.StickyService.DBClient.InitializeStickyChannels()
 	if err != nil {
 		log.Fatalf("error initializing sticky channels: %v", err)

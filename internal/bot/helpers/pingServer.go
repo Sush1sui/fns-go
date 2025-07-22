@@ -15,6 +15,9 @@ func PingServerLoop(serverURL string) {
 	}
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	for {
+		minutes := r.Intn(5) + 10 // 10-14 inclusive
+		fmt.Printf("Waiting %d minutes before pinging server...\n", minutes)
+		time.Sleep(time.Duration(minutes) * time.Minute)
 		resp, err := http.Get(serverURL)
 		if err != nil {
 			fmt.Printf("Ping failed: %v\n", err)
@@ -26,8 +29,5 @@ func PingServerLoop(serverURL string) {
 			continue
 		}
 		fmt.Printf("Server is reachable, Status: %s\n", resp.Status)
-		minutes := r.Intn(5) + 10 // 10-14 inclusive
-		fmt.Printf("Waiting %d minutes before pinging server...\n", minutes)
-		time.Sleep(time.Duration(minutes) * time.Minute)
 	}
 }

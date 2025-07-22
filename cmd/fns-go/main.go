@@ -31,10 +31,22 @@ func main() {
 
 	// get collection
 	stickyCollection := mongoClient.Database(os.Getenv("MONGODB_NAME")).Collection(os.Getenv("MONGODB_STICKY_CHANNELS_COLLECTION"))
+	nicknameRequestCollection := mongoClient.Database(os.Getenv("MONGODB_NAME")).Collection(os.Getenv("MONGODB_NICKNAME_REQUESTS_COLLECTION"))
+	exemptedCollection := mongoClient.Database(os.Getenv("MONGODB_NAME")).Collection(os.Getenv("MONGODB_EXEMPTED_USERS_COLLECTION"))
 
 	repository.StickyService = repository.StickyServiceType{
 		DBClient: &mongodb.MongoClient{
 			Client: stickyCollection,
+		},
+	}
+	repository.NicknameRequestService = repository.NicknameRequestServiceType{
+		DBClient: &mongodb.MongoClient{
+			Client: nicknameRequestCollection,
+		},
+	}
+	repository.ExemptedService = repository.ExemptedServiceType{
+		DBClient: &mongodb.MongoClient{
+			Client: exemptedCollection,
 		},
 	}
 

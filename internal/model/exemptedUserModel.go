@@ -8,6 +8,6 @@ import (
 
 type ExemptedUser struct {
 	ID          bson.ObjectID `bson:"_id,omitempty"`
-	UserID      string         `bson:"user_id,omitempty"`
+	UserID      string         `bson:"userId,omitempty"`
 	Expiration  time.Time     `bson:"expiration,omitempty"`
 }
