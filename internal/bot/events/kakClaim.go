@@ -5,14 +5,19 @@ import (
 	"os"
 	"slices"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/Sush1sui/fns-go/internal/common"
 	"github.com/bwmarrin/discordgo"
 )
 
-var kakClaimCommands = []string{"$kak claim", "$kc", "$tc", "$trash claim"}
-
+var (
+	kakClaimCommands   = []string{"$kak claim", "$kc", "$tc", "$trash claim"}
+	kakClaimTimeoutMap  = make(map[string]*time.Timer)
+	kakClaimIntervalMap = make(map[string]*time.Ticker)
+	kakClaimMu          = sync.Mutex{}
+)
 
 func OnKakClaim(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Author.ID == s.State.User.ID || m.Author.Bot {
@@ -28,17 +33,17 @@ func OnKakClaim(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	common.KakClaimMu.Lock()
+	kakClaimMu.Lock()
 	// Stop and clean up previous timers if they exist
-	if timer, exists := common.KakClaimTimeoutMap[m.Author.ID]; exists {
+	if timer, exists := kakClaimTimeoutMap[m.Author.ID]; exists {
 		timer.Stop()
-		delete(common.KakClaimTimeoutMap, m.Author.ID)
+		delete(kakClaimTimeoutMap, m.Author.ID)
 	}
-	if ticker, exists := common.KakClaimIntervalMap[m.Author.ID]; exists {
+	if ticker, exists := kakClaimIntervalMap[m.Author.ID]; exists {
 		ticker.Stop()
-		delete(common.KakClaimIntervalMap, m.Author.ID)
+		delete(kakClaimIntervalMap, m.Author.ID)
 	}
-	common.KakClaimMu.Unlock()
+	kakClaimMu.Unlock()
 
 	// Start a new timer for the user
 	remainingTime := int(common.KakClaimTimer.Seconds())
@@ -58,20 +63,23 @@ func OnKakClaim(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if err != nil {
 			fmt.Println("Error sending kak claim ready message:", err)
 		}
-		common.KakClaimMu.Lock()
-		delete(common.KakClaimTimeoutMap, m.Author.ID)
-		delete(common.KakClaimIntervalMap, m.Author.ID)
-		common.KakClaimMu.Unlock()
+		kakClaimMu.Lock()
+		delete(kakClaimTimeoutMap, m.Author.ID)
+		delete(kakClaimIntervalMap, m.Author.ID)
+		kakClaimMu.Unlock()
 	})
 
-	common.KakClaimMu.Lock()
-	common.KakClaimTimeoutMap[m.Author.ID] = timeout
-	common.KakClaimIntervalMap[m.Author.ID] = ticker
-	common.KakClaimMu.Unlock()
+	kakClaimMu.Lock()
+	kakClaimTimeoutMap[m.Author.ID] = timeout
+	kakClaimIntervalMap[m.Author.ID] = ticker
+	kakClaimMu.Unlock()
 
 	go func() {
 		for i := remainingTime - 1; i > 0; i-- {
-			<-ticker.C
+			_, ok := <-ticker.C
+			if !ok {
+				return // Channel closed, exit the goroutine
+			}
 			// Update the countdown message
 			_, err := s.ChannelMessageEdit(m.ChannelID, replyMsg.ID, fmt.Sprintf("**<@%s> can kak/trash claim in %d seconds!**", m.Author.ID, i))
 			if err != nil {

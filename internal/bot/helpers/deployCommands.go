@@ -1,6 +1,7 @@
 package helpers
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/Sush1sui/fns-go/internal/bot/commands"
@@ -10,19 +11,19 @@ import (
 // List all slash commands here
 var SlashCommands = []*discordgo.ApplicationCommand{
 	{
-		Name:        "sticky_get_list", // Use underscore, not space
+		Name:        "sticky-get-list", // Use underscore, not space
 		Description: "Replies with a list of sticky channels",
 		Type:        discordgo.ChatApplicationCommand,
 		DefaultMemberPermissions: func() *int64 { p := int64(discordgo.PermissionAdministrator); return &p }(), // Administrators only
 	},
 	{
-		Name:        "sticky_delete_all",
+		Name:        "sticky-delete-all",
 		Description: "Deletes all sticky channels",
 		Type:        discordgo.ChatApplicationCommand,
 		DefaultMemberPermissions: func() *int64 { p := int64(discordgo.PermissionAdministrator); return &p }(), // Administrators only
 	},
 	{
-		Name:        "sticky_delete",
+		Name:        "sticky-delete",
 		Description: "Deletes a sticky channel",
 		Type:        discordgo.ChatApplicationCommand,
 		Options: []*discordgo.ApplicationCommandOption{
@@ -36,7 +37,7 @@ var SlashCommands = []*discordgo.ApplicationCommand{
 		DefaultMemberPermissions: func() *int64 { p := int64(discordgo.PermissionAdministrator); return &p }(), // Administrators only
 	},
 	{
-		Name:        "sticky_create",
+		Name:        "sticky-create",
 		Description: "Creates a sticky channel",
 		Type:        discordgo.ChatApplicationCommand,
 		Options: []*discordgo.ApplicationCommandOption{
@@ -56,7 +57,7 @@ var SlashCommands = []*discordgo.ApplicationCommand{
 		DefaultMemberPermissions: func() *int64 { p := int64(discordgo.PermissionAdministrator); return &p }(), // Administrators only
 	},
 	{
-		Name:        "sticky_set_message",
+		Name:        "sticky-set-message",
 		Description: "Sets the message for a sticky channel",
 		Type:        discordgo.ChatApplicationCommand,
 		Options: []*discordgo.ApplicationCommandOption{
@@ -75,15 +76,30 @@ var SlashCommands = []*discordgo.ApplicationCommand{
 		},
 		DefaultMemberPermissions: func() *int64 { p := int64(discordgo.PermissionAdministrator); return &p }(), // Administrators only
 	},
+	{
+		Name:        "edit-kc",
+		Description: "Sets a timer for kak/trash claim",
+		Type:        discordgo.ChatApplicationCommand,
+		Options: []*discordgo.ApplicationCommandOption{
+			{
+				Type:        discordgo.ApplicationCommandOptionInteger,
+				Name:        "timer",
+				Description: "The number of seconds to set the timer for",
+				Required:    true,
+			},
+		},
+		DefaultMemberPermissions: func() *int64 { p := int64(discordgo.PermissionKickMembers); return &p }(),
+	},
 	// Add more commands here
 }
 
 // Map command names to handler functions
 var CommandHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
-	"sticky_create":    commands.StickyCreate,
-	"sticky_get_list": commands.StickyGetAll,
-	"sticky_delete":   commands.StickyDelete,
-	"sticky_delete_all": commands.StickyDeleteAll, // Match the command name exactly
+	"sticky-create":    commands.StickyCreate,
+	"sticky-get-list": commands.StickyGetAll,
+	"sticky-delete":   commands.StickyDelete,
+	"sticky-delete-all": commands.StickyDeleteAll,
+	"edit-kc": commands.KakClaimSetTimer,
 	// Add more: "hello": commands.HelloCommand, etc.
 }
 
@@ -112,9 +128,12 @@ func DeployCommands(sess *discordgo.Session) {
 
 	// Register handler for slash commands
 	sess.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			fmt.Printf("Received command: %s from user: %s in guild: %s\n", i.ApplicationCommandData().Name, i.Member.User.Username, i.GuildID)
 			if handler, ok := CommandHandlers[i.ApplicationCommandData().Name]; ok {
 					handler(s, i)
 			} else {
+					fmt.Printf("Unknown command: %s\n", i.ApplicationCommandData().Name)
+					fmt.Printf("Available commands: %v\n", CommandHandlers)
 					s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 							Type: discordgo.InteractionResponseChannelMessageWithSource,
 							Data: &discordgo.InteractionResponseData{

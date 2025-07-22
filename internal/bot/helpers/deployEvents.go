@@ -13,6 +13,7 @@ var EventHandlers = []any{
 	events.OnAutoReact,
 	events.OnGifAndAttachment,
 	events.OnKakClaim,
+	events.OnMemberBoost,
 	// Add more event handlers here, e.g.:
 	// Go doesn't support dynamic runtime imports
 	// You have to manually add each event handler
