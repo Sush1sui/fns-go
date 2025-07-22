@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/Sush1sui/fns-go/internal/repository"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -46,6 +47,7 @@ func ScanForVanityLinks(s *discordgo.Session) {
 
 	supporterLink := os.Getenv("SUPPORTER_LINK")
 	supporterRoleID := strings.Split(os.Getenv("SUPPORTER_ROLE_IDS"), ",")[0]
+	exemptedRoleID := strings.Split(os.Getenv("SUPPORTER_ROLE_IDS"), ",")[1]
 
 	if supporterLink == "" || supporterRoleID == "" {
 		fmt.Println("SUPPORTER_LINK or SUPPORTER_ROLE_IDS environment variable is not set")
@@ -70,6 +72,18 @@ func ScanForVanityLinks(s *discordgo.Session) {
 		if len(members) < 1000 {
 			break
 		}
+	}
+
+	exemptedUsers, err := repository.ExemptedService.DBClient.GetAllExemptedUsers()
+	if err != nil {
+		fmt.Println("Error fetching exempted users:", err)
+		return
+	}
+
+	// Create a map for O(1) lookups
+	exemptedUserIDs := make(map[string]bool)
+	for _, user := range exemptedUsers {
+		exemptedUserIDs[user.UserID] = true
 	}
 
 	var supporterRole *discordgo.Role
@@ -129,7 +143,7 @@ func ScanForVanityLinks(s *discordgo.Session) {
         }
     }
 
-		includesSupporterLink := strings.Contains(customStatus, supporterLink)
+		includesSupporterLink := strings.Contains(customStatus, supporterLink) || exemptedUserIDs[member.User.ID]
 		hasSupporterRole := slices.Contains(member.Roles, supporterRole.ID)
 
 		if includesSupporterLink && hasSupporterRole {
@@ -175,10 +189,14 @@ func ScanForVanityLinks(s *discordgo.Session) {
 			currentColor = rainbowTransition[(colorIndex + 1) % len(rainbowTransition)]
 		} else if !includesSupporterLink && hasSupporterRole {
 			// remove the role
+			rolesToRemove := map[string]struct{}{
+				supporterRoleID: {},
+				exemptedRoleID: {},
+			}
 			newRoles := make([]string, 0, len(member.Roles))
-			for _, roleID := range member.Roles {
-				if roleID != supporterRole.ID {
-					newRoles = append(newRoles, roleID)
+			for _, roleId := range member.Roles {
+				if _, remove := rolesToRemove[roleId]; !remove {
+					newRoles = append(newRoles, roleId)
 				}
 			}
 			member.Roles = newRoles

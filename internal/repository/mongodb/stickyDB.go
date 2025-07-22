@@ -7,12 +7,7 @@ import (
 	"github.com/Sush1sui/fns-go/internal/common"
 	"github.com/Sush1sui/fns-go/internal/model"
 	"go.mongodb.org/mongo-driver/v2/bson"
-	"go.mongodb.org/mongo-driver/v2/mongo"
 )
-
-type MongoClient struct {
-	Client *mongo.Collection
-}
 
 func (c MongoClient) InitializeStickyChannels() error {
 	res, err := c.GetAllStickyChannels()

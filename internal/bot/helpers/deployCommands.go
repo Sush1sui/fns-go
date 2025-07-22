@@ -90,6 +90,34 @@ var SlashCommands = []*discordgo.ApplicationCommand{
 		},
 		DefaultMemberPermissions: func() *int64 { p := int64(discordgo.PermissionKickMembers); return &p }(),
 	},
+	{
+		Name:        "vanity-add",
+		Description: "Adds a user for vanity exemption",
+		Type:        discordgo.ChatApplicationCommand,
+		Options: []*discordgo.ApplicationCommandOption{
+			{
+				Type:        discordgo.ApplicationCommandOptionUser,
+				Name:        "user",
+				Description: "The user to add for vanity exemption",
+				Required:    true,
+			},
+		},
+		DefaultMemberPermissions: func() *int64 { p := int64(discordgo.PermissionAdministrator); return &p }(), // Administrators only
+	},
+	{
+		Name:        "vanity-remove",
+		Description: "Removes a user from vanity exemption",
+		Type:        discordgo.ChatApplicationCommand,
+		Options: []*discordgo.ApplicationCommandOption{
+			{
+				Type:        discordgo.ApplicationCommandOptionUser,
+				Name:        "user",
+				Description: "The user to remove from vanity exemption",
+				Required:    true,
+			},
+		},
+		DefaultMemberPermissions: func() *int64 { p := int64(discordgo.PermissionAdministrator); return &p }(), // Administrators only
+	},
 	// Add more commands here
 }
 
@@ -100,6 +128,8 @@ var CommandHandlers = map[string]func(s *discordgo.Session, i *discordgo.Interac
 	"sticky-delete":   commands.StickyDelete,
 	"sticky-delete-all": commands.StickyDeleteAll,
 	"edit-kc": commands.KakClaimSetTimer,
+	"vanity-add": commands.VanityAdd,
+	"vanity-remove": commands.VanityRemove,
 	// Add more: "hello": commands.HelloCommand, etc.
 }
 
