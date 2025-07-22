@@ -65,12 +65,15 @@ func (c *MongoClient) RemoveNicknameRequest(messageId string) (int, error) {
 		return 0, fmt.Errorf("messageId cannot be empty")
 	}
 
-	res, err := c.Client.DeleteOne(context.Background(), bson.M{"userMessageId": messageId})
-	if err != nil {
-		return 0, fmt.Errorf("error deleting nickname request with messageId: %s, %v", messageId, err)
+	res := c.Client.FindOneAndDelete(context.Background(), bson.M{"userMessageId": messageId})
+	if res.Err() != nil {
+		if res.Err() == mongo.ErrNoDocuments {
+			return 0, nil // No document found to delete
+		}
+		return 0, fmt.Errorf("error deleting nickname request with messageId: %s, %v", messageId, res.Err())
 	}
-
-	return int(res.DeletedCount), nil
+	// Since FindOneAndDelete does not return DeletedCount, assume 1 if no error
+	return 1, nil
 }
 
 func (c *MongoClient) SetupNicknameRequestCollector(s *discordgo.Session, message *discordgo.Message, nickname string) error {
@@ -133,9 +136,19 @@ func (c *MongoClient) SetupNicknameRequestCollector(s *discordgo.Session, messag
             if err != nil {
                 fmt.Println("Error reacting to user message:", err)
             }
-            repository.NicknameRequestService.DBClient.RemoveNicknameRequest(message.ID)
+            count, err := repository.NicknameRequestService.DBClient.RemoveNicknameRequest(request.UserMessageID)
+						if err != nil {
+								fmt.Println("Error removing nickname request:", err)
+						} else if count == 0 {
+								fmt.Println("No nickname request was removed (count == 0)")
+						}
         	case deniedEmojiID:
-            repository.NicknameRequestService.DBClient.RemoveNicknameRequest(message.ID)
+            count, err := repository.NicknameRequestService.DBClient.RemoveNicknameRequest(request.UserMessageID)
+            if err != nil {
+								fmt.Println("Error removing nickname request:", err)
+						} else if count == 0 {
+								fmt.Println("No nickname request was removed (count == 0)")
+						}
             err = s.MessageReactionAdd(request.UserChannelID, request.UserMessageID, "No:1310633209519669290")
             if err != nil {
                 fmt.Println("Error reacting to user message:", err)

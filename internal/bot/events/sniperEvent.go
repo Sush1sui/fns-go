@@ -39,10 +39,10 @@ func OnSnipeMudae(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
+	if len(m.Embeds) == 0 || m.Embeds[0] == nil {
+        return
+    }
 	embed := m.Embeds[0]
-	if len(m.Embeds) == 0 || embed == nil {
-		return
-	}
 
 	if !strings.Contains(strings.ToLower(embed.Footer.Text), "belongs to") && embed.Author.Name == "" {
 		return
