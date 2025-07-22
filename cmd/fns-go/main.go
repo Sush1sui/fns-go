@@ -22,6 +22,7 @@ func main() {
 		panic(err)
 	}
 
+
 	mongoClient := config.MongoConnection() // Initialize MongoDB connection
 	defer mongoClient.Disconnect(context.Background())
 	if err := mongoClient.Ping(context.Background(), nil); err != nil {

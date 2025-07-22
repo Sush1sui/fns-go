@@ -51,6 +51,7 @@ func New() (*Config, error) {
 	}, nil
 }
 
+
 func MongoConnection() *mongo.Client {
 	// Use the SetServerAPIOptions() method to set the version of the Stable API on the client
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
