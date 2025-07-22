@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/Sush1sui/fns-go/internal/bot/helpers"
 	"github.com/Sush1sui/fns-go/internal/config"
@@ -51,6 +52,14 @@ func StartBot() {
 
 	// Deploy events
 	helpers.DeployEvents(sess)
+
+	// periodic vanity scan
+	go func() {
+		for {
+			helpers.ScanForVanityLinks(sess)
+			time.Sleep(time.Hour) // sleep for 1 hour
+		}
+	}()
 
 	err = repository.StickyService.DBClient.InitializeStickyChannels()
 	if err != nil {
