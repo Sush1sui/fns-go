@@ -14,9 +14,13 @@ func OnNicknameRequest(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Author.Bot{
 		return
 	}
-	if m.ChannelID != "1310583941287379116" && !strings.HasPrefix(strings.ToLower(m.Content), "!rn") {
+	if m.ChannelID != "1310583941287379116" {
 		return
 	}
+	if !strings.HasPrefix(strings.ToLower(m.Content), "!rn") {
+		return
+	}
+	fmt.Println("Received nickname request from user:", m.Author.ID)
 
 	nicknameRequest := strings.TrimSpace(m.Content[len("!rn"):])
 	if nicknameRequest == "" {

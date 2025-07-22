@@ -127,6 +127,7 @@ var CommandHandlers = map[string]func(s *discordgo.Session, i *discordgo.Interac
 	"sticky-get-list": commands.StickyGetAll,
 	"sticky-delete":   commands.StickyDelete,
 	"sticky-delete-all": commands.StickyDeleteAll,
+	"sticky-set-message": commands.StickySetMessage,
 	"edit-kc": commands.KakClaimSetTimer,
 	"vanity-add": commands.VanityAdd,
 	"vanity-remove": commands.VanityRemove,

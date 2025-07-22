@@ -17,6 +17,8 @@ var EventHandlers = []any{
 	events.OnMemberJoin,
 	events.OnMemberLeave,
 	events.OnStealEmoji,
+	events.OnNicknameRequest,
+	events.OnSnipeMudae,
 	// Add more event handlers here, e.g.:
 	// Go doesn't support dynamic runtime imports
 	// You have to manually add each event handler
