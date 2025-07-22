@@ -158,7 +158,6 @@ func DeployCommands(sess *discordgo.Session) {
 
 	// Register handler for slash commands
 	sess.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			fmt.Printf("Received command: %s from user: %s in guild: %s\n", i.ApplicationCommandData().Name, i.Member.User.Username, i.GuildID)
 			if handler, ok := CommandHandlers[i.ApplicationCommandData().Name]; ok {
 					handler(s, i)
 			} else {

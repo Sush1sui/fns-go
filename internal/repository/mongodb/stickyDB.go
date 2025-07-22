@@ -50,7 +50,7 @@ func (c *MongoClient) GetStickyChannel(channelID string) *model.StickyChannel {
 	var channel model.StickyChannel
 
 	// Find the StickyChannel by ChannelID
-	err := c.Client.FindOne(context.Background(), bson.M{"channel_id": channelID}).Decode(&channel)
+	err := c.Client.FindOne(context.Background(), bson.M{"channelId": channelID}).Decode(&channel)
 	if err != nil {
 		return nil // Return nil if no channel is found or if an error occurs
 	}
@@ -91,7 +91,7 @@ func (c *MongoClient) GetRecentPostMessageId(channelId string) (string, error) {
 	var channel model.StickyChannel
 
 	// Find the StickyChannel by ChannelID
-	err := c.Client.FindOne(context.Background(), bson.M{"channel_id": channelId}).Decode(&channel)
+	err := c.Client.FindOne(context.Background(), bson.M{"channelId": channelId}).Decode(&channel)
 	if err != nil {
 		return "", fmt.Errorf("error finding sticky channel for channelId: %s, %v", channelId, err)
 	}
@@ -110,12 +110,12 @@ func (c *MongoClient) UpdateStickyMessageId(channelId, lastMessageId, recentPost
 
 	update := bson.M{
 		"$set": bson.M{
-			"last_sticky_message_id": lastMessageId,
-			"recent_post_message_id": recentPostMessageId,
+			"lastStickyMessageId": lastMessageId,
+			"recentPostMessageId": recentPostMessageId,
 		},
 	}
 
-	result := c.Client.FindOneAndUpdate(context.Background(), bson.M{"channel_id": channelId}, update)
+	result := c.Client.FindOneAndUpdate(context.Background(), bson.M{"channelId": channelId}, update)
 	if result.Err() != nil {
 		return nil, fmt.Errorf("error updating sticky message ID for channelId: %s, %v", channelId, result.Err())
 	}
@@ -135,11 +135,11 @@ func (c *MongoClient) SetStickyMessageId(channelId, stickyMessageId string) (*mo
 
 	update := bson.M{
 		"$set": bson.M{
-			"sticky_message": stickyMessageId,
+			"stickyMessage": stickyMessageId,
 		},
 	}
 
-	result := c.Client.FindOneAndUpdate(context.Background(), bson.M{"channel_id": channelId}, update)
+	result := c.Client.FindOneAndUpdate(context.Background(), bson.M{"channelId": channelId}, update)
 	if result.Err() != nil {
 		return nil, fmt.Errorf("error updating sticky message ID for channelId: %s, %v", channelId, result.Err())
 	}
@@ -157,7 +157,7 @@ func (c *MongoClient) DeleteStickyChannel(channelId string) (int, error) {
 		return 0, fmt.Errorf("channelId cannot be empty")
 	}
 
-	result, err := c.Client.DeleteOne(context.Background(), bson.M{"channel_id": channelId})
+	result, err := c.Client.DeleteOne(context.Background(), bson.M{"channelId": channelId})
 	if err != nil {
 		return 0, fmt.Errorf("error deleting sticky channel with channelId: %s, %v", channelId, err)
 	}

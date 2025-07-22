@@ -41,7 +41,7 @@ var rainbowTransition = []string{
 func ScanForVanityLinks(s *discordgo.Session) {
 	guild, err := s.State.Guild(os.Getenv("GUILD_ID")) // Replace with your guild ID
 	if err != nil {
-		fmt.Println("Error fetching guild:", err)
+		fmt.Println("Error fetching guild for vanity:", err)
 		return
 	}
 
@@ -145,6 +145,7 @@ func ScanForVanityLinks(s *discordgo.Session) {
 
 		includesSupporterLink := strings.Contains(customStatus, supporterLink) || exemptedUserIDs[member.User.ID]
 		hasSupporterRole := slices.Contains(member.Roles, supporterRole.ID)
+
 
 		if includesSupporterLink && hasSupporterRole {
 			fmt.Println("Member already has the role and status:", member.User.Username)

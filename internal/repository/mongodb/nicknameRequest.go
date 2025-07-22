@@ -63,7 +63,7 @@ func (c *MongoClient) RemoveNicknameRequest(messageId string) (int, error) {
 		return 0, fmt.Errorf("messageId cannot be empty")
 	}
 
-	res, err := c.Client.DeleteOne(context.Background(), bson.M{"user_message_id": messageId})
+	res, err := c.Client.DeleteOne(context.Background(), bson.M{"userMessageId": messageId})
 	if err != nil {
 		return 0, fmt.Errorf("error deleting nickname request with messageId: %s, %v", messageId, err)
 	}
@@ -153,7 +153,7 @@ func (c *MongoClient) GetNicknameRequestByStaffMessageID(messageID string) (*mod
 	}
 
 	var request model.NicknameRequest
-	err := c.Client.FindOne(context.Background(), bson.M{"staff_message_id": messageID}).Decode(&request)
+	err := c.Client.FindOne(context.Background(), bson.M{"staffMessageId": messageID}).Decode(&request)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, nil // No request found
@@ -165,7 +165,7 @@ func (c *MongoClient) GetNicknameRequestByStaffMessageID(messageID string) (*mod
 
 func (c *MongoClient) InitializeNicknameRequests(s *discordgo.Session) error {
 	guildID := os.Getenv("GUILD_ID")
-	guild, err := s.Guild(guildID)
+	guild, err := s.State.Guild(guildID)
 	if err != nil || guild == nil {
 		return fmt.Errorf("guild not found: %v", err)
 	}

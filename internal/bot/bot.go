@@ -27,7 +27,7 @@ func StartBot() {
 		log.Fatalf("error creating Discord session: %v", err)
 	}
 
-	sess.Identify.Intents = discordgo.IntentsAllWithoutPrivileged
+	sess.Identify.Intents = discordgo.IntentsAllWithoutPrivileged | discordgo.IntentsGuildPresences | discordgo.IntentsGuildMembers | discordgo.IntentsGuildMessages
 
 	sess.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
     s.UpdateStatusComplex(discordgo.UpdateStatusData{
@@ -69,7 +69,12 @@ func StartBot() {
 		}
 	}()
 
-	err = repository.StickyService.DBClient.InitializeStickyChannels()
+	go func() {
+		err = repository.StickyService.DBClient.InitializeStickyChannels()
+		if err != nil {
+			fmt.Println("Error initializing sticky channels:", err)
+		}
+	}()
 	if err != nil {
 		log.Fatalf("error initializing sticky channels: %v", err)
 	}

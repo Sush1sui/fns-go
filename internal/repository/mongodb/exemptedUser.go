@@ -21,10 +21,10 @@ func (c *MongoClient) ExemptUserVanity(userID string) (bool, error) {
 	var res bson.M
 	err := c.Client.FindOneAndUpdate(
 		context.Background(),
-		bson.M{"user_id": userID}, // filter
+		bson.M{"userId": userID}, // filter
 		bson.M{ // update
 			"$set": bson.M{
-				"user_id": userID,
+				"userId": userID,
 				"expiration": expirationDate,
 			},
 		},
@@ -44,7 +44,7 @@ func (c *MongoClient) RemoveExemptedUser(userID string) (int, error) {
 		return 0, fmt.Errorf("userID cannot be empty")
 	}
 
-	res, err := c.Client.DeleteOne(context.Background(), bson.M{"user_id": userID})
+	res, err := c.Client.DeleteOne(context.Background(), bson.M{"userId": userID})
 	if err != nil {
 		return 0, fmt.Errorf("error deleting exempted user with userID: %s, %v", userID, err)
 	}
