@@ -38,7 +38,7 @@ func OnAutoReact(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}()
 	}
 
-	if strings.Contains(strings.ReplaceAll(strings.ToLower(m.Content), " ", ""), "hahaha") {
+	if strings.Contains(strings.ReplaceAll(strings.ToLower(m.Content), " ", ""), "sushi") {
 		go func() {
 			err := s.MessageReactionAdd(m.ChannelID, m.ID, "SushiRolling:1293411594621157458")
 			if err != nil {
