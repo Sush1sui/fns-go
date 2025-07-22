@@ -11,6 +11,8 @@ import (
 var EventHandlers = []any{
 	events.OnSticky,
 	events.OnAutoReact,
+	events.OnGifAndAttachment,
+	events.OnKakClaim,
 	// Add more event handlers here, e.g.:
 	// Go doesn't support dynamic runtime imports
 	// You have to manually add each event handler

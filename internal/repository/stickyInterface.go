@@ -2,8 +2,6 @@ package repository
 
 import "github.com/Sush1sui/fns-go/internal/model"
 
-var StickyChannels = map[string]struct{}{}
-
 type StickyInterface interface {
 	InitializeStickyChannels() error
 	GetAllStickyChannels() ([]*model.StickyChannel, error)
