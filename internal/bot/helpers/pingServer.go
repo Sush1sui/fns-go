@@ -8,6 +8,7 @@ import (
 )
 
 func PingServerLoop(serverURL string) {
+	fmt.Println("Server URL is: ", serverURL)
 	if serverURL == "" {
 		fmt.Println("Server URL is not set, skipping ping loop.")
 		return
