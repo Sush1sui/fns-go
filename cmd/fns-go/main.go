@@ -44,6 +44,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	bot.StartBot()
 	helpers.PingServerLoop(cfg.ServerURL)
+	bot.StartBot()
 }

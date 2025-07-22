@@ -8,6 +8,10 @@ import (
 )
 
 func PingServerLoop(serverURL string) {
+	if serverURL == "" {
+		fmt.Println("Server URL is not set, skipping ping loop.")
+		return
+	}
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	for {
 		resp, err := http.Get(serverURL)
