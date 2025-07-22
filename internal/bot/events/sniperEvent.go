@@ -40,7 +40,7 @@ func OnSnipeMudae(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	embed := m.Embeds[0]
-	if embed == nil {
+	if len(m.Embeds) == 0 || embed == nil {
 		return
 	}
 

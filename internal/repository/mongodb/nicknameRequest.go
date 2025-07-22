@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"slices"
 
+	"github.com/Sush1sui/fns-go/internal/common"
 	"github.com/Sush1sui/fns-go/internal/model"
 	"github.com/Sush1sui/fns-go/internal/repository"
 	"github.com/bwmarrin/discordgo"
@@ -12,10 +14,10 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
-var approveEmoji = os.Getenv("APPROVE_EMOJI")
-var denyEmoji = os.Getenv("DENY_EMOJI")
-var approvedEmojiID = os.Getenv("APPROVED_EMOJI_ID")
-var deniedEmojiID = os.Getenv("DENIED_EMOJI_ID")
+var approveEmoji string
+var denyEmoji string
+var approvedEmojiID string
+var deniedEmojiID string
 
 func (c *MongoClient) GetAllNicknameRequests() ([]*model.NicknameRequest, error) {
 	var requests []*model.NicknameRequest
@@ -91,33 +93,30 @@ func (c *MongoClient) SetupNicknameRequestCollector(s *discordgo.Session, messag
             return
         }
 
+				
         // Check staff role
-        staffRoleID := os.Getenv("STAFF_ROLE_ID") // Or use your STAFF_ROLE_IDS[0]
-        hasStaffRole := false
-        for _, roleID := range member.Roles {
-            if roleID == staffRoleID {
-                hasStaffRole = true
-                break
-            }
-        }
+        hasStaffRole := slices.Contains(member.Roles, common.StaffRoleIDs[0])
         if !hasStaffRole {
             return
         }
 
         // Check emoji
         if r.Emoji.ID != approvedEmojiID && r.Emoji.ID != deniedEmojiID {
+            fmt.Println("Unrecognized emoji reaction:", r.Emoji.ID)
             return
         }
 
         // Fetch nickname request from DB
         request, err := repository.NicknameRequestService.DBClient.GetNicknameRequestByStaffMessageID(message.ID)
         if err != nil || request == nil {
+            fmt.Println("Error fetching nickname request:", err)
             return
         }
 
         // Get the user to change
         userToChange, err := s.GuildMember(guildID, request.UserID)
         if err != nil || userToChange == nil {
+						fmt.Println("Error fetching user to change nickname:", err)
             return
         }
 
@@ -130,11 +129,17 @@ func (c *MongoClient) SetupNicknameRequestCollector(s *discordgo.Session, messag
                 fmt.Printf("Changed nickname for %s to %s\n", userToChange.User.Username, nickname)
             }
             // React to user message
-            s.MessageReactionAdd(request.UserChannelID, request.UserMessageID, approveEmoji)
+            err = s.MessageReactionAdd(request.UserChannelID, request.UserMessageID, "Check_White_FNS:1310274014102687854")
+            if err != nil {
+                fmt.Println("Error reacting to user message:", err)
+            }
             repository.NicknameRequestService.DBClient.RemoveNicknameRequest(message.ID)
         	case deniedEmojiID:
             repository.NicknameRequestService.DBClient.RemoveNicknameRequest(message.ID)
-            s.MessageReactionAdd(request.UserChannelID, request.UserMessageID, denyEmoji)
+            err = s.MessageReactionAdd(request.UserChannelID, request.UserMessageID, "No:1310633209519669290")
+            if err != nil {
+                fmt.Println("Error reacting to user message:", err)
+            }
             fmt.Printf("Nickname request for %s to %s is denied\n", userToChange.User.Username, nickname)
 					case "":
 						// Handle case where emoji is not recognized
@@ -164,6 +169,11 @@ func (c *MongoClient) GetNicknameRequestByStaffMessageID(messageID string) (*mod
 }
 
 func (c *MongoClient) InitializeNicknameRequests(s *discordgo.Session) error {
+	approveEmoji = os.Getenv("APPROVE_EMOJI")
+	denyEmoji = os.Getenv("DENY_EMOJI")
+	approvedEmojiID = os.Getenv("APPROVED_EMOJI_ID")
+	deniedEmojiID = os.Getenv("DENIED_EMOJI_ID")
+	
 	guildID := os.Getenv("GUILD_ID")
 	guild, err := s.State.Guild(guildID)
 	if err != nil || guild == nil {

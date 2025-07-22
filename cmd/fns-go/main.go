@@ -10,6 +10,7 @@ import (
 
 	"github.com/Sush1sui/fns-go/internal/bot"
 	"github.com/Sush1sui/fns-go/internal/bot/helpers"
+	"github.com/Sush1sui/fns-go/internal/common"
 	"github.com/Sush1sui/fns-go/internal/config"
 	"github.com/Sush1sui/fns-go/internal/repository"
 	"github.com/Sush1sui/fns-go/internal/repository/mongodb"
@@ -21,6 +22,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	// Initialize global variables
+	common.InitializeGlobalVars()
 
 
 	mongoClient := config.MongoConnection() // Initialize MongoDB connection

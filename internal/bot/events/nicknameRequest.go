@@ -2,7 +2,6 @@ package events
 
 import (
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/Sush1sui/fns-go/internal/common"
@@ -44,25 +43,29 @@ func OnNicknameRequest(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	message, err := s.ChannelMessageSendEmbed(approvalChannel.ID, embed)
+	content := fmt.Sprintf("<@&%s>", common.StaffRoleIDs[0])
+	message, err := s.ChannelMessageSendComplex(approvalChannel.ID, &discordgo.MessageSend{
+			Content: content, // This will mention the staff role
+			Embed:   embed,
+	})
 	if err != nil {
 		fmt.Println("Error sending message:", err)
 		return
 	}
 
-	err = s.MessageReactionAdd(approvalChannel.ID, message.ID, os.Getenv("APPROVE_EMOJI_ID"))
+	err = s.MessageReactionAdd(message.ChannelID, message.ID, "Check_White_FNS:1310274014102687854")
 	if err != nil {
 		fmt.Println("Error adding approve reaction:", err)
 		return
 	}
-	err = s.MessageReactionAdd(approvalChannel.ID, message.ID, os.Getenv("DENIED_EMOJI_ID"))
+	err = s.MessageReactionAdd(message.ChannelID, message.ID, "No:1310633209519669290")
 	if err != nil {
 		fmt.Println("Error adding deny reaction:", err)
 		return
 	}
 
 	// Create nickname request in the database
-	_, err = repository.NicknameRequestService.DBClient.CreateNicknameRequest(nicknameRequest, m.Author.ID, message.ID, m.ChannelID, approvalChannel.ID, message.ID)
+	_, err = repository.NicknameRequestService.DBClient.CreateNicknameRequest(nicknameRequest, m.Author.ID, m.ID, m.ChannelID, approvalChannel.ID, message.ID)
 	if err != nil {
 		fmt.Println("Error creating nickname request:", err)
 		return
