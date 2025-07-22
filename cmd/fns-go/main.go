@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/Sush1sui/fns-go/internal/bot"
 	"github.com/Sush1sui/fns-go/internal/bot/helpers"
@@ -38,12 +40,24 @@ func main() {
 	addr := fmt.Sprintf(":%s", cfg.ServerPort)
 	router := routes.NewRouter()
 	fmt.Printf("Server listening on Port:%s\n", cfg.ServerPort)
-	
 
-	err = http.ListenAndServe(addr, router)
-	if err != nil {
-		panic(err)
-	}
-	helpers.PingServerLoop(cfg.ServerURL)
-	bot.StartBot()
+	// Run HTTP server in a goroutine
+	go func() {
+		if err := http.ListenAndServe(addr, router); err != nil {
+			// Log error instead of panicking to avoid crashing the service
+			fmt.Printf("HTTP server error: %v\n", err)
+		}
+	}()
+
+	// Run Discord bot in a goroutine
+	go bot.StartBot()
+
+	// Run PingServerLoop in a goroutine
+	go helpers.PingServerLoop(cfg.ServerURL)
+
+	// Block main goroutine until interrupt signal (Ctrl+C)
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+	<-sigChan
+	fmt.Println("Shutting down...")
 }
