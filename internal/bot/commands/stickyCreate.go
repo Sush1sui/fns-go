@@ -3,6 +3,7 @@ package commands
 import (
 	"fmt"
 
+	"github.com/Sush1sui/fns-go/internal/common"
 	"github.com/Sush1sui/fns-go/internal/repository"
 	"github.com/bwmarrin/discordgo"
 )
@@ -33,7 +34,7 @@ func StickyCreate(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	// check if the channel is already a sticky channel
 	channelID := channel.ChannelValue(s).ID
 	isSticky := false
-	for id := range repository.StickyChannels {
+	for id := range common.StickyChannels {
 		if id == channelID {
 			isSticky = true
 			break

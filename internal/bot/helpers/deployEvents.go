@@ -8,8 +8,9 @@ import (
 )
 
 
-var EventHandlers = map[string]interface{}{
-	"MessageCreate": events.OnSticky,
+var EventHandlers = []any{
+	events.OnSticky,
+	events.OnAutoReact,
 	// Add more event handlers here, e.g.:
 	// Go doesn't support dynamic runtime imports
 	// You have to manually add each event handler

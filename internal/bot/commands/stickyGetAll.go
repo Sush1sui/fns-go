@@ -3,7 +3,7 @@ package commands
 import (
 	"fmt"
 
-	"github.com/Sush1sui/fns-go/internal/repository"
+	"github.com/Sush1sui/fns-go/internal/common"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -12,7 +12,7 @@ func StickyGetAll(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		return
 	}
 
-	if len(repository.StickyChannels) == 0 {
+	if len(common.StickyChannels) == 0 {
 		embed := &discordgo.MessageEmbed{
 			Title:       "No Sticky Channels Found",
 			Description: "There are currently no sticky channels set up.",
@@ -29,10 +29,10 @@ func StickyGetAll(s *discordgo.Session, i *discordgo.InteractionCreate) {
 
 	var stickyList string
 	count := 0
-	for id := range repository.StickyChannels {
+	for id := range common.StickyChannels {
 		stickyList += "<#" + id + ">\n"
 		count++
-		if count < len(repository.StickyChannels)-1 {
+		if count < len(common.StickyChannels)-1 {
         stickyList += "\n"
     }
 	}

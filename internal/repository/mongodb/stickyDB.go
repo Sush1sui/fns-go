@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/Sush1sui/fns-go/internal/common"
 	"github.com/Sush1sui/fns-go/internal/model"
-	"github.com/Sush1sui/fns-go/internal/repository"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
@@ -21,7 +21,7 @@ func (c MongoClient) InitializeStickyChannels() error {
 	}
 
 	for _, channel := range res {
-		repository.StickyChannels[channel.ChannelID] = struct{}{} // Add the new channel ID to the StickyChannels map
+		common.StickyChannels[channel.ChannelID] = struct{}{} // Add the new channel ID to the StickyChannels map
 	}
 	return nil
 }
@@ -84,7 +84,7 @@ func (c MongoClient) CreateStickyChannel(channelID, stickyMessage string) (strin
 		return "", fmt.Errorf("error inserting sticky channel: %v", err)
 	}
 
-	repository.StickyChannels[channelID] = struct{}{} // Add the new channel ID to the StickyChannels map
+	common.StickyChannels[channelID] = struct{}{} // Add the new channel ID to the StickyChannels map
 
 	return result.InsertedID.(bson.ObjectID).Hex(), nil // Return the ID of the created StickyChannel
 }
@@ -172,7 +172,7 @@ func (c MongoClient) DeleteStickyChannel(channelId string) (int, error) {
 	}
 
 	// Remove the channel ID from the StickyChannels map
-	delete(repository.StickyChannels, channelId)
+	delete(common.StickyChannels, channelId)
 
 	return int(result.DeletedCount), nil // Return the number of deleted channels
 }
@@ -184,7 +184,7 @@ func (c MongoClient) DeleteAllStickyChannels() (int, error) {
 	}
 
 	// Clear the StickyChannels map after deletion
-	repository.StickyChannels = map[string]struct{}{}
+	common.StickyChannels = map[string]struct{}{}
 
 	return int(result.DeletedCount), nil // Return the number of deleted channels
 }

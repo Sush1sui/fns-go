@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/Sush1sui/fns-go/internal/common"
 	"github.com/Sush1sui/fns-go/internal/repository"
 	"github.com/bwmarrin/discordgo"
 )
@@ -30,7 +31,7 @@ func OnSticky(s *discordgo.Session, m *discordgo.MessageCreate) {
 	defer lock.Unlock()
 	
 	// Check if the channel is a sticky channel
-	if _, ok := repository.StickyChannels[m.ChannelID]; !ok {
+	if _, ok := common.StickyChannels[m.ChannelID]; !ok {
 			return
 	}
 
