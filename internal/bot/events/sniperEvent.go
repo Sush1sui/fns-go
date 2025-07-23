@@ -49,36 +49,34 @@ func OnSnipeMudae(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	if !strings.Contains(strings.ToLower(embed.Footer.Text), "belongs to") {
-		return
-	}
+		if _, ok := charactersSet[strings.ToLower(embed.Author.Name)]; ok {
+			for _, id := range vipUsers {
+				go func(userID string) {
+					user, err := s.User(userID)
+					if err != nil || user == nil {
+						fmt.Println("Error fetching user:", err)
+						return
+					}
+					dmChannel, err := s.UserChannelCreate(userID)
+					if err != nil {
+						fmt.Println("Error creating DM channel:", err)
+						return
+					}
 
-	if _, ok := charactersSet[strings.ToLower(embed.Author.Name)]; ok {
-		for _, id := range vipUsers {
-			go func(userID string) {
-				user, err := s.User(userID)
-				if err != nil || user == nil {
-					fmt.Println("Error fetching user:", err)
-					return
-				}
-				dmChannel, err := s.UserChannelCreate(userID)
-				if err != nil {
-					fmt.Println("Error creating DM channel:", err)
-					return
-				}
+					// Construct the jump link
+					messageURL := fmt.Sprintf("https://discord.com/channels/%s/%s/%s", m.GuildID, m.ChannelID, m.ID)
+					content := fmt.Sprintf("# A top character `%s` has appeared! Click here to jump to the message: %s", embed.Author.Name, messageURL)
 
-				// Construct the jump link
-				messageURL := fmt.Sprintf("https://discord.com/channels/%s/%s/%s", m.GuildID, m.ChannelID, m.ID)
-				content := fmt.Sprintf("# A top character `%s` has appeared! Click here to jump to the message: %s", embed.Author.Name, messageURL)
-
-				_, err = s.ChannelMessageSendComplex(dmChannel.ID, &discordgo.MessageSend{
-					Content: content,
-					Embed:   embed,
-				})
-				if err != nil {
-					fmt.Println("Error sending DM:", err)
-					return
-				}
-        }(id)
+					_, err = s.ChannelMessageSendComplex(dmChannel.ID, &discordgo.MessageSend{
+						Content: content,
+						Embed:   embed,
+					})
+					if err != nil {
+						fmt.Println("Error sending DM:", err)
+						return
+					}
+				}(id)
+			}
 		}
 	}
 }
