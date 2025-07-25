@@ -30,7 +30,7 @@ func OnMemberLeave(s *discordgo.Session, m *discordgo.GuildMemberRemove) {
 		for _, msg := range messages {
 			if msg.Author != nil && msg.Author.ID == s.State.User.ID &&
 				len(msg.Embeds) > 0 &&
-				strings.Contains(msg.Embeds[0].Title, "<@"+m.User.ID+">") {
+				strings.Contains(msg.Embeds[0].Description, "Welcome") {
 					_ = s.ChannelMessageDelete(welcomeChannel.ID, msg.ID)
 					break
 				}
