@@ -10,7 +10,6 @@ import (
 )
 
 var charactersSet = make(map[string]struct{})
-var vipUsers = strings.Split(os.Getenv("SNIPER_VIP_USERS"), ",")
 
 func init() {
     file, err := os.Open("internal/common/characters.json")
@@ -50,7 +49,9 @@ func OnSnipeMudae(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	if !strings.Contains(strings.ToLower(embed.Footer.Text), "belongs to") {
 		if _, ok := charactersSet[strings.ToLower(embed.Author.Name)]; ok {
-			for _, id := range vipUsers {
+
+			vipUsers := strings.SplitSeq(os.Getenv("SNIPER_VIP_USERS"), ",")
+			for id := range vipUsers {
 				go func(userID string) {
 					user, err := s.User(userID)
 					if err != nil || user == nil {
