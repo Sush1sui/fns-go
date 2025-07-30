@@ -17,10 +17,15 @@ import (
 func StartBot() {
 	// Load configuration
 	cfg, err := config.New()
-	if err != nil || cfg.DiscordToken == "" {
+	if err != nil{
 		panic(err)
 	}
+
+
 	// create new discord session
+	if cfg.DiscordToken == "" {
+		fmt.Println("Bot token not found")
+	}
 	sess, err := discordgo.New("Bot " + cfg.DiscordToken)
 	if err != nil {
 		log.Fatalf("error creating Discord session: %v", err)
