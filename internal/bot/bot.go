@@ -17,10 +17,9 @@ import (
 func StartBot() {
 	// Load configuration
 	cfg, err := config.New()
-	if err != nil {
+	if err != nil || cfg.DiscordToken == "" {
 		panic(err)
 	}
-
 	// create new discord session
 	sess, err := discordgo.New("Bot " + cfg.DiscordToken)
 	if err != nil {
@@ -43,7 +42,6 @@ func StartBot() {
 
 	err = sess.Open()
 	if err != nil {
-
 		log.Fatalf("error opening connection to Discord: %v", err)
 	}
 	defer sess.Close()
