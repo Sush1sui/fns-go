@@ -21,7 +21,6 @@ func StartBot() {
 		panic(err)
 	}
 
-	fmt.Println("Discord token is:", cfg.DiscordToken)
 	// create new discord session
 	sess, err := discordgo.New("Bot " + cfg.DiscordToken)
 	if err != nil {
