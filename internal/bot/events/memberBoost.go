@@ -53,7 +53,13 @@ func OnMemberBoost(s *discordgo.Session, m *discordgo.GuildMemberUpdate) {
 			Timestamp: time.Now().Format(time.RFC3339),
 		}
 
-		_, err := s.ChannelMessageSendEmbed(boostChannel.ID, embed)
+		_, err := s.ChannelMessageSendComplex(boostChannel.ID, &discordgo.MessageSend{
+			Embed: embed,
+			AllowedMentions: &discordgo.MessageAllowedMentions{
+				Parse: []discordgo.AllowedMentionType{discordgo.AllowedMentionTypeUsers},
+			},
+			Content: fmt.Sprintf("# <@%s> HAS BOOSTED THE SERVER", m.User.ID),
+		})
 		if err != nil {
 			fmt.Println("Error sending boost message:", err)
 			return
