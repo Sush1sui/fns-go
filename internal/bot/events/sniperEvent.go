@@ -49,9 +49,9 @@ func OnSnipeMudae(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	if !strings.Contains(strings.ToLower(embed.Footer.Text), "belongs to") {
 		if _, ok := charactersSet[strings.ToLower(embed.Author.Name)]; ok {
-
-			vipUsers := strings.SplitSeq(os.Getenv("SNIPER_VIP_USERS"), ",")
-			for id := range vipUsers {
+			fmt.Println("Top character found:", embed.Author.Name)
+			vipUsers := strings.Split(os.Getenv("SNIPER_VIP_USERS"), ",")
+			for _, id := range vipUsers {
 				go func(userID string) {
 					user, err := s.User(userID)
 					if err != nil || user == nil {
