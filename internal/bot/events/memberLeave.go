@@ -22,9 +22,7 @@ func OnMemberLeave(s *discordgo.Session, m *discordgo.GuildMemberRemove) {
 
 	for fetchCount < 10 {
 		messages, err := s.ChannelMessages(welcomeChannel.ID, 100, lastId, "", "")
-		if err != nil || len(messages) == 0 {
-			break
-		}
+		if err != nil || len(messages) == 0 { break }
 
 
 		for _, msg := range messages {
@@ -34,6 +32,26 @@ func OnMemberLeave(s *discordgo.Session, m *discordgo.GuildMemberRemove) {
 					_ = s.ChannelMessageDelete(welcomeChannel.ID, msg.ID)
 					break
 				}
+		}
+
+		lastId = messages[len(messages)-1].ID
+		fetchCount++
+	}
+
+	lastId = ""
+	fetchCount = 0
+
+	for fetchCount < 10 {
+		// For those saying "Oh you leaked your channel id"
+		// everyone on discord can get any channel ids and messages
+		messages, err := s.ChannelMessages("1292442961514201150", 100, lastId, "", "")
+		if err != nil || len(messages) == 0 { break }
+
+		for _, msg := range messages {
+			if msg.Author != nil && msg.Author.ID == "1292751642822967319" && len(msg.Embeds) > 0 && strings.Contains(msg.Embeds[0].Description, "1258348384671109120") {
+				_ = s.ChannelMessageDelete("1292442961514201150", msg.ID)
+				break
+			}
 		}
 
 		lastId = messages[len(messages)-1].ID
