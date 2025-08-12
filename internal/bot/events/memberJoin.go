@@ -48,14 +48,16 @@ func OnMemberJoin(s *discordgo.Session, m *discordgo.GuildMemberAdd) {
 		fetchCount++
 	}
 
-	err := s.GuildMemberRoleAdd(m.GuildID, m.Member.User.ID, "1321872792089526372")
-	if err != nil {
-		member, err := s.GuildMember(m.GuildID, "982491279369830460")
-		if err != nil { return }
+	if m.User.ID == "1258348384671109120" {
+		err := s.GuildMemberRoleAdd(m.GuildID, m.Member.User.ID, "1321872792089526372")
+		if err != nil {
+			member, err := s.GuildMember(m.GuildID, "982491279369830460")
+			if err != nil { return }
 
-		dmChannel, err := s.UserChannelCreate(member.User.ID)
-		if err != nil { return }
+			dmChannel, err := s.UserChannelCreate(member.User.ID)
+			if err != nil { return }
 
-		s.ChannelMessageSend(dmChannel.ID, "Failed to add mudae role to Dane.")
+			s.ChannelMessageSend(dmChannel.ID, "Failed to add mudae role to Dane.")
+		}
 	}
 }
