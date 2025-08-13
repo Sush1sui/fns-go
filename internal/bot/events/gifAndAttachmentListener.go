@@ -34,7 +34,7 @@ func OnGifAndAttachment(s *discordgo.Session, m *discordgo.MessageCreate) {
 		fmt.Println("Ignoring message from guild owner")
 		return
 	}
-	if !common.HasAdminRole(&discordgo.Guild{ID: m.GuildID}, m.Member) {
+	if common.HasAdminRole(&discordgo.Guild{ID: m.GuildID}, m.Member) {
 		fmt.Println("Ignoring message from non-admin user")
 		return
 	}
