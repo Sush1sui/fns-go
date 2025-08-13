@@ -20,7 +20,7 @@ var (
 )
 
 func OnGifAndAttachment(s *discordgo.Session, m *discordgo.MessageCreate) {
-	if m.Author.ID == s.State.User.ID || m.Author.Bot {
+	if m.Author.ID == s.State.User.ID || m.Author.Bot || slices.Contains(common.ChannelExceptionIDs, m.ChannelID) {
 		return
 	}
 	if m.Member == nil {
@@ -44,7 +44,7 @@ func OnGifAndAttachment(s *discordgo.Session, m *discordgo.MessageCreate) {
 	
 	includesLinks := false
 	for _, keyword := range common.Keywords {
-		if strings.Contains(m.Content, keyword) {
+		if strings.Contains(strings.ToLower(m.Content), keyword) {
 			includesLinks = true
 			break
 		}

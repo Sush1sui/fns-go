@@ -17,6 +17,6 @@ func InitializeGlobalVars() {
 	PrivilegedRoleIDs = append(PrivilegedRoleIDs, strings.Split(os.Getenv("PRIVILEDGED_ROLE_IDS"), ",")...)
 }
 
-var Keywords = []string{"http", "www.", "discord.gg/"}
+var Keywords = []string{"http://", "https://", "www.", "discord.gg/"}
 
 var KakClaimTimer = 15 * time.Second
