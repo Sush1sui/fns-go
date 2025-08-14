@@ -11,9 +11,7 @@ import (
 var memberBoostCache = make(map[string]int64) // userID -> PremiumSince.Unix()
 
 func OnMemberBoost(s *discordgo.Session, m *discordgo.GuildMemberUpdate) {
-	if m.User.ID == s.State.User.ID || m.User.Bot {
-		return
-	}
+	if m.User.ID == s.State.User.ID || m.User.Bot { return }
 
 	boostChannel, err := s.Channel(os.Getenv("BOOST_CHANNEL_ID"))
 	if err != nil || boostChannel == nil {
@@ -75,4 +73,29 @@ func OnMemberBoost(s *discordgo.Session, m *discordgo.GuildMemberUpdate) {
 		// Update the cache
 		memberBoostCache[m.User.ID] = newBoost
 	}
+}
+
+func SyncMemberBoostCache(s *discordgo.Session, guildID string) {
+    fmt.Println("Syncing member boost cache...")
+    after := ""
+    for {
+        members, err := s.GuildMembers(guildID, after, 1000)
+        if err != nil {
+            fmt.Println("Error fetching guild members for boost cache:", err)
+            break
+        }
+        if len(members) == 0 {
+            break
+        }
+        for _, m := range members {
+            if m.PremiumSince != nil {
+                memberBoostCache[m.User.ID] = m.PremiumSince.Unix()
+            }
+            after = m.User.ID
+        }
+        if len(members) < 1000 {
+            break
+        }
+    }
+    fmt.Printf("Synced %d boosted members to cache.\n", len(memberBoostCache))
 }

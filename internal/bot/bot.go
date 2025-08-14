@@ -8,7 +8,9 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/Sush1sui/fns-go/internal/bot/events"
 	"github.com/Sush1sui/fns-go/internal/bot/helpers"
+	"github.com/Sush1sui/fns-go/internal/common"
 	"github.com/Sush1sui/fns-go/internal/config"
 	"github.com/Sush1sui/fns-go/internal/repository"
 	"github.com/bwmarrin/discordgo"
@@ -82,6 +84,9 @@ func StartBot() {
 	if err != nil {
 		log.Fatalf("error initializing sticky channels: %v", err)
 	}
+
+	// initialize boost cache
+	go events.SyncMemberBoostCache(sess, common.GuildID)
 
 	fmt.Println("Bot is now running")
 
