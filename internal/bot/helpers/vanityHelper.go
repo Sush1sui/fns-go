@@ -6,7 +6,9 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 
+	"github.com/Sush1sui/fns-go/internal/common"
 	"github.com/Sush1sui/fns-go/internal/repository"
 	"github.com/bwmarrin/discordgo"
 )
@@ -80,6 +82,25 @@ func ScanForVanityLinks(s *discordgo.Session) {
 		return
 	}
 
+	// check for expired vanity
+    now := time.Now()
+    filtered := exemptedUsers[:0] // reuse backing array
+    for _, u := range exemptedUsers {
+        if u.Expiration.IsZero() || u.Expiration.After(now) {
+            // keep users without expiration or not yet expired
+            filtered = append(filtered, u)
+            continue
+        }
+
+        // remove expired user from DB
+        if _, err := repository.ExemptedService.DBClient.RemoveExemptedUser(u.UserID); err != nil {
+            fmt.Println("Error removing expired vanity for user:", u.UserID, err) // does not keep locally even if DB deletion failed
+        } else {
+            fmt.Println("(Expired vanity) Removed vanity user:", u.UserID)
+        }
+    }
+    exemptedUsers = filtered
+
 	// Create a map for O(1) lookups
 	exemptedUserIDs := make(map[string]bool)
 	for _, user := range exemptedUsers {
@@ -124,24 +145,32 @@ func ScanForVanityLinks(s *discordgo.Session) {
 
 	for _, member := range allMembers {
 		// skip bots
-		if member.User.Bot {
-			continue
-		}
+		if member.User.Bot { continue }
 
 		// Find the presence for this member
-    presence := presenceMap[member.User.ID]
-    if presence == nil {
-      continue // No presence info for this member
-    }
+		presence := presenceMap[member.User.ID]
+		if presence == nil {
+		continue // No presence info for this member
+		}
+
+		// skip staff members
+		isStaff := false
+		for _, rid := range member.Roles {
+			if slices.Contains(common.StaffRoleIDs, rid) {
+				isStaff = true
+				break
+			}
+		}
+		if isStaff { continue }
 
 		// Find the custom status activity with the desired state
-    var customStatus string
-    for _, activity := range presence.Activities {
-        if activity.State == supporterLink {
-            customStatus = activity.State
-            break
-        }
-    }
+		var customStatus string
+		for _, activity := range presence.Activities {
+			if activity.State == supporterLink {
+				customStatus = activity.State
+				break
+			}
+		}
 
 		includesSupporterLink := strings.Contains(customStatus, supporterLink) || exemptedUserIDs[member.User.ID]
 		hasSupporterRole := slices.Contains(member.Roles, supporterRole.ID)

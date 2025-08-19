@@ -10,15 +10,36 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
-func (c *MongoClient) ExemptUserVanity(userID string) (bool, error) {
+func (c *MongoClient) ExemptUserVanity(userID, role string) (bool, error) {
 	if userID == "" {
 		return false, fmt.Errorf("userID cannot be empty")
 	}
 	
-	expirationDate := time.Now().Add(3 * 24 * time.Hour) // 3 days from now
-
-	// Use FindOneAndUpdate to either update an existing document or insert a new one
 	var res bson.M
+	if role == "staff" {
+		err := c.Client.FindOneAndUpdate(
+			context.Background(),
+			bson.M{"userId": userID}, // filter
+			bson.M{ // update
+				"$set": bson.M{
+                    "userId": userID,
+                },
+                "$unset": bson.M{
+                    "expiration": "",
+                },
+			},
+			options.FindOneAndUpdate().SetUpsert(true).SetReturnDocument(options.After),
+		).Decode(&res)
+
+		if err != nil {
+			fmt.Println("Error updating or inserting exempted user:", err)
+			return false, err
+		}
+
+		return true, nil
+	}
+
+	expirationDate := time.Now().Add(3 * 24 * time.Hour) // 3 days from now
 	err := c.Client.FindOneAndUpdate(
 		context.Background(),
 		bson.M{"userId": userID}, // filter

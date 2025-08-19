@@ -6,6 +6,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/Sush1sui/fns-go/internal/common"
 	"github.com/Sush1sui/fns-go/internal/repository"
 	"github.com/bwmarrin/discordgo"
 )
@@ -31,20 +32,46 @@ func VanityAdd(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		return
 	}
 
-	res, err := repository.ExemptedService.DBClient.ExemptUserVanity(user.ID)
-	if err != nil || !res {
-		e := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Content: "Failed to add vanity exemption",
-				Flags:   discordgo.MessageFlagsEphemeral,
-			},
-		})
-		if e != nil {
-			fmt.Println("Failed to respond to interaction:", e)
+	isStaff := false
+	for _, uid := range i.Member.Roles {
+		if slices.Contains(common.StaffRoleIDs, uid) {
+			isStaff = true
+			break
+		}
+	}
+
+	if isStaff {
+		res, err := repository.ExemptedService.DBClient.ExemptUserVanity(user.ID, "staff")
+		if err != nil || !res {
+			e := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Content: "Failed to add vanity exemption",
+					Flags:   discordgo.MessageFlagsEphemeral,
+				},
+			})
+			if e != nil {
+				fmt.Println("Failed to respond to interaction:", e)
+				return
+			}
 			return
 		}
-		return
+	} else {
+		res, err := repository.ExemptedService.DBClient.ExemptUserVanity(user.ID, "")
+		if err != nil || !res {
+			e := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Content: "Failed to add vanity exemption",
+					Flags:   discordgo.MessageFlagsEphemeral,
+				},
+			})
+			if e != nil {
+				fmt.Println("Failed to respond to interaction:", e)
+				return
+			}
+			return
+		}
 	}
 
 	newRoleIds := strings.Split(os.Getenv("SUPPORTER_ROLE_IDS"), ",")
