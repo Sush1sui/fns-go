@@ -124,7 +124,7 @@ var SlashCommands = []*discordgo.ApplicationCommand{
 		Type:        discordgo.ChatApplicationCommand,
 		Options: []*discordgo.ApplicationCommandOption{
 			{
-				Type:        discordgo.ApplicationCommandOptionChannel,
+				Type:        discordgo.ApplicationCommandOptionString,
 				Name:        "category_id",
 				Description: "The category to set default permissions for",
 				Required:    true,
