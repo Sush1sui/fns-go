@@ -34,7 +34,7 @@ func SetDefaultPermsCategoryJTC(s *discordgo.Session, i *discordgo.InteractionCr
         {
             ID:    "1292473360114122784", // finest role
             Type:  discordgo.PermissionOverwriteTypeRole,
-            Allow: discordgo.PermissionCreateInstantInvite | discordgo.PermissionCreatePublicThreads | discordgo.PermissionSendMessages | discordgo.PermissionCreatePrivateThreads | discordgo.PermissionSendMessagesInThreads | discordgo.PermissionAddReactions | discordgo.PermissionManageThreads | discordgo.PermissionReadMessageHistory | discordgo.PermissionVoiceSpeak | discordgo.PermissionVoiceStreamVideo | discordgo.PermissionUseEmbeddedActivities | discordgo.PermissionViewChannel,
+            Allow: discordgo.PermissionCreateInstantInvite | discordgo.PermissionCreatePublicThreads | discordgo.PermissionSendMessages | discordgo.PermissionCreatePrivateThreads | discordgo.PermissionSendMessagesInThreads | discordgo.PermissionAddReactions | discordgo.PermissionManageThreads | discordgo.PermissionReadMessageHistory | discordgo.PermissionVoiceSpeak | discordgo.PermissionVoiceStreamVideo | discordgo.PermissionUseEmbeddedActivities | discordgo.PermissionViewChannel | discordgo.PermissionVoiceConnect,
         },
         {
             ID:    "1303998295911436309", // lvl50
