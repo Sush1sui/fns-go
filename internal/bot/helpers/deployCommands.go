@@ -118,6 +118,20 @@ var SlashCommands = []*discordgo.ApplicationCommand{
 		},
 		DefaultMemberPermissions: func() *int64 { p := int64(discordgo.PermissionAdministrator); return &p }(), // Administrators only
 	},
+	{
+		Name:        "default-perms-category-jtc",
+		Description: "Sets default permissions for a category (for JTCs)",
+		Type:        discordgo.ChatApplicationCommand,
+		Options: []*discordgo.ApplicationCommandOption{
+			{
+				Type:        discordgo.ApplicationCommandOptionChannel,
+				Name:        "category",
+				Description: "The category to set default permissions for",
+				Required:    true,
+			},
+		},
+		DefaultMemberPermissions: func() *int64 { p := int64(discordgo.PermissionAdministrator); return &p }(), // Administrators only
+	},
 	// Add more commands here
 }
 
@@ -131,6 +145,7 @@ var CommandHandlers = map[string]func(s *discordgo.Session, i *discordgo.Interac
 	"edit-kc": commands.KakClaimSetTimer,
 	"vanity-add": commands.VanityAdd,
 	"vanity-remove": commands.VanityRemove,
+	"default-perms-category-jtc": commands.SetDefaultPermsCategoryJTC,
 	// Add more: "hello": commands.HelloCommand, etc.
 }
 
