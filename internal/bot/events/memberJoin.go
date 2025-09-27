@@ -11,6 +11,9 @@ import (
 func OnMemberJoin(s *discordgo.Session, m *discordgo.GuildMemberAdd) {
 	if m.User.ID == s.State.User.ID || m.User.Bot { return }
 
+	// give user finest role
+	s.GuildMemberRoleAdd(m.GuildID, m.Member.User.ID, "1292473360114122784")
+
 	if m.Member.User.ID != "1258348384671109120" {
 		s.ChannelMessageSendEmbed(os.Getenv("WELCOME_CHANNEL_ID"), &discordgo.MessageEmbed{
 			Color: 0xffffff,

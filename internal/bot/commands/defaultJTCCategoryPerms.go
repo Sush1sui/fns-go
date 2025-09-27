@@ -24,7 +24,7 @@ func SetDefaultPermsCategoryJTC(s *discordgo.Session, i *discordgo.InteractionCr
         {
             ID:   i.GuildID, // @everyone
             Type: discordgo.PermissionOverwriteTypeRole,
-            Deny: discordgo.PermissionViewChannel | discordgo.PermissionVoiceConnect | discordgo.PermissionSendMessages,
+            Deny: discordgo.PermissionSendMessages,
         },
         {
             ID:    "1299577480868528330", // music bots
