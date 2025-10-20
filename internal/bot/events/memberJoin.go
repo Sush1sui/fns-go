@@ -4,15 +4,48 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 )
 
+var finestRoleID = "1292473360114122784"
+
 func OnMemberJoin(s *discordgo.Session, m *discordgo.GuildMemberAdd) {
 	if m.User.ID == s.State.User.ID || m.User.Bot { return }
 
-	// give user finest role
-	s.GuildMemberRoleAdd(m.GuildID, m.Member.User.ID, "1292473360114122784")
+	// Start a goroutine to check if Dyno bot assigns the role, if not, assign it manually
+	go func() {
+		// Wait 5 seconds for Dyno to assign the role
+		time.Sleep(5 * time.Second)
+
+		// Fetch the member to check their current roles
+		member, err := s.GuildMember(m.GuildID, m.User.ID)
+		if err != nil {
+			// If we can't fetch the member, try to add the role anyway
+			s.GuildMemberRoleAdd(m.GuildID, m.User.ID, finestRoleID)
+			return
+		}
+
+		// Check if the member already has the finest role
+		hasRole := false
+		for _, roleID := range member.Roles {
+			if roleID == finestRoleID {
+				hasRole = true
+				break
+			}
+		}
+
+		// If the member doesn't have the role, add it manually
+		if !hasRole {
+			err := s.GuildMemberRoleAdd(m.GuildID, m.User.ID, finestRoleID)
+			if err != nil {
+				fmt.Printf("Failed to add finest role to %s: %v\n", m.User.Username, err)
+			} else {
+				fmt.Printf("Manually added finest role to %s (Dyno fallback)\n", m.User.Username)
+			}
+		}
+	}()
 
 	if m.Member.User.ID != "1258348384671109120" {
 		s.ChannelMessageSendEmbed(os.Getenv("WELCOME_CHANNEL_ID"), &discordgo.MessageEmbed{
