@@ -12,6 +12,9 @@ import (
 var finestRoleID = "1292473360114122784"
 
 func OnMemberJoin(s *discordgo.Session, m *discordgo.GuildMemberAdd) {
+	// logging
+	fmt.Println("Joined: ", m.User.Username)
+
 	if m.User.ID == s.State.User.ID || m.User.Bot { return }
 
 	// Start a goroutine to check if Dyno bot assigns the role, if not, assign it manually
