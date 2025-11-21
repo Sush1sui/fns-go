@@ -8,6 +8,10 @@ import (
 	"os/signal"
 	"syscall"
 
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
+
 	"github.com/Sush1sui/fns-go/internal/bot"
 	"github.com/Sush1sui/fns-go/internal/bot/helpers"
 	"github.com/Sush1sui/fns-go/internal/common"
@@ -36,6 +40,20 @@ func main() {
 	stickyCollection := mongoClient.Database(os.Getenv("MONGODB_NAME")).Collection(os.Getenv("MONGODB_STICKY_CHANNELS_COLLECTION"))
 	nicknameRequestCollection := mongoClient.Database(os.Getenv("MONGODB_NAME")).Collection(os.Getenv("MONGODB_NICKNAME_REQUESTS_COLLECTION"))
 	exemptedCollection := mongoClient.Database(os.Getenv("MONGODB_NAME")).Collection(os.Getenv("MONGODB_EXEMPTED_USERS_COLLECTION"))
+
+	// Ensure TTL index on `expiration` field so documents expire automatically when the timestamp passes.
+	// expireAfterSeconds=0 causes MongoDB to remove documents as soon as `expiration` <= now.
+	go func() {
+		idxModel := mongo.IndexModel{
+			Keys:    bson.D{{Key: "expiration", Value: 1}},
+			Options: options.Index().SetExpireAfterSeconds(0),
+		}
+		if _, err := exemptedCollection.Indexes().CreateOne(context.Background(), idxModel); err != nil {
+			fmt.Printf("warning: failed to create TTL index for exempted collection: %v\n", err)
+		} else {
+			fmt.Println("TTL index for exempted collection ensured")
+		}
+	}()
 
 	repository.StickyService = repository.StickyServiceType{
 		DBClient: &mongodb.MongoClient{

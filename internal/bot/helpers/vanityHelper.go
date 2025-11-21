@@ -82,24 +82,20 @@ func ScanForVanityLinks(s *discordgo.Session) {
 		return
 	}
 
-	// check for expired vanity
-    now := time.Now()
-    filtered := exemptedUsers[:0] // reuse backing array
-    for _, u := range exemptedUsers {
-        if u.Expiration.IsZero() || u.Expiration.After(now) {
-            // keep users without expiration or not yet expired
-            filtered = append(filtered, u)
-            continue
-        }
+	// filter out expired vanity users locally — MongoDB TTL will remove expired docs automatically
+	now := time.Now().UTC()
+	filtered := exemptedUsers[:0] // reuse backing array
+	for _, u := range exemptedUsers {
+		if u.UserID == "1258348384671109120" {continue}
 
-        // remove expired user from DB
-        if _, err := repository.ExemptedService.DBClient.RemoveExemptedUser(u.UserID); err != nil {
-            fmt.Println("Error removing expired vanity for user:", u.UserID, err) // does not keep locally even if DB deletion failed
-        } else {
-            fmt.Println("(Expired vanity) Removed vanity user:", u.UserID)
-        }
-    }
-    exemptedUsers = filtered
+		if u.Expiration.IsZero() || u.Expiration.After(now) {
+			filtered = append(filtered, u)
+		} else {
+			// detected expired entry; TTL index (server-side) will delete this document shortly
+			fmt.Println("(Expired vanity) Detected expired user (TTL will remove):", u.UserID)
+		}
+	}
+	exemptedUsers = filtered
 
 	// Create a map for O(1) lookups
 	exemptedUserIDs := make(map[string]bool)

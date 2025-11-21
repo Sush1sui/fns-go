@@ -40,8 +40,7 @@ func StartBot() {
         Status: "idle",
         Activities: []*discordgo.Activity{
             {
-                Name: "with Finesse!",
-                Type: discordgo.ActivityTypeGame,
+                Name: "Do it with Finesse!",
             },
         },
     })

@@ -15,88 +15,69 @@ func VanityRemove(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		return
 	}
 
+	// Defer the interaction so we can perform work and edit the response later
+	if err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseDeferredChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Flags: discordgo.MessageFlagsEphemeral,
+		},
+	}); err != nil {
+		fmt.Println("Failed to defer interaction:", err)
+		return
+	}
+
 	user := i.ApplicationCommandData().GetOption("user").UserValue(s)
 	if user == nil {
-		err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Content: "You must specify a user to remove a vanity.",
-				Flags:   discordgo.MessageFlagsEphemeral,
-			},
-		})
-		if err != nil {
-			fmt.Println("Failed to respond to interaction:", err)
-			return
+		msg := "You must specify a user to remove a vanity."
+		if _, e := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{Content: &msg}); e != nil {
+			fmt.Println("Failed to edit deferred interaction:", e)
 		}
 		return
 	}
 
 	count, err := repository.ExemptedService.DBClient.RemoveExemptedUser(user.ID)
-	if err != nil || count == 0 {
-		e := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Content: "Failed to remove vanity exemption",
-				Flags:   discordgo.MessageFlagsEphemeral,
-			},
-		})
-		if e != nil {
-			fmt.Println("Failed to respond to interaction:", e)
-			return
+	if err != nil {
+		msg := "Failed to remove vanity exemption"
+		if _, e := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{Content: &msg}); e != nil {
+			fmt.Println("Failed to edit deferred interaction:", e)
+		}
+		return
+	}
+	if count == 0 {
+		// Nothing was removed — user had no exemption
+		msg := fmt.Sprintf("User %s does not have an active vanity exemption.", user.Username)
+		if _, e := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{Content: &msg}); e != nil {
+			fmt.Println("Failed to edit deferred interaction:", e)
 		}
 		return
 	}
 
-	roleIdsToRemove := strings.Split(os.Getenv("SUPPORTER_ROLE_IDS"), ",")
-	if len(roleIdsToRemove) == 0 {
-		err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Content: "No supporter roles found in environment variables. Talk to your developer.",
-				Flags:   discordgo.MessageFlagsEphemeral,
-			},
-		})
-		if err != nil {
-			fmt.Println("Failed to respond to interaction:", err)
-			return
+	// Parse supporter role IDs once and validate
+	supporterRoleIDs := strings.Split(os.Getenv("SUPPORTER_ROLE_IDS"), ",")
+	if len(supporterRoleIDs) == 0 {
+		msg := "No supporter roles found in environment variables. Talk to your developer."
+		if _, e := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{Content: &msg}); e != nil {
+			fmt.Println("Failed to edit deferred interaction:", e)
 		}
 		return
 	}
 
 	member, err := s.GuildMember(i.GuildID, user.ID)
 	if err != nil {
-		err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Content: "Failed to fetch user information.",
-				Flags:   discordgo.MessageFlagsEphemeral,
-			},
-		})
-		if err != nil {
-			fmt.Println("Failed to respond to interaction:", err)
-			return
+		msg := "Failed to fetch user information."
+		if _, e := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{Content: &msg}); e != nil {
+			fmt.Println("Failed to edit deferred interaction:", e)
 		}
 		return
 	}
 
-	supporterRoleIDs := strings.Split(os.Getenv("SUPPORTER_ROLE_IDS"), ",")
-	if len(supporterRoleIDs) == 0 {
-		err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Content: "No supporter roles found in environment variables. Talk to your developer.",
-				Flags:   discordgo.MessageFlagsEphemeral,
-			},
-		})
-		if err != nil {
-			fmt.Println("Failed to respond to interaction:", err)
-			return
-		}
-		return
+	// Build rolesToRemove safely from available supporterRoleIDs (support 1 or more)
+	rolesToRemove := make(map[string]struct{})
+	if len(supporterRoleIDs) >= 1 && supporterRoleIDs[0] != "" {
+		rolesToRemove[supporterRoleIDs[0]] = struct{}{}
 	}
-	rolesToRemove := map[string]struct{}{
-		supporterRoleIDs[0]: {},
-		supporterRoleIDs[1]: {},
+	if len(supporterRoleIDs) >= 2 && supporterRoleIDs[1] != "" {
+		rolesToRemove[supporterRoleIDs[1]] = struct{}{}
 	}
 	updatedRoles := make([]string, 0, len(member.Roles))
 	for _, roleId := range member.Roles {
@@ -110,30 +91,22 @@ func VanityRemove(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			Roles: &updatedRoles,
 		})
 		if err != nil {
-			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Content: "Failed to update user roles.",
-					Flags:   discordgo.MessageFlagsEphemeral,
-				},
-			})
-			if err != nil {
-				fmt.Println("Failed to respond to interaction:", err)
-				return
+			msg := "Failed to update user roles."
+			if _, e := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{Content: &msg}); e != nil {
+				fmt.Println("Failed to edit deferred interaction:", e)
 			}
 			return
 		}
+
+		// Edit deferred response with success after DB deletion and role update
+		successMsg := fmt.Sprintf("✅ | Removed vanity exemption and roles for %s.", user.Username)
+		if _, e := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{Content: &successMsg}); e != nil {
+			fmt.Println("Failed to edit deferred interaction:", e)
+		}
 	} else {
-		err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Content: fmt.Sprintf("User %s does not have any vanity roles to remove.", user.Username),
-				Flags:   discordgo.MessageFlagsEphemeral,
-			},
-		})
-		if err != nil {
-			fmt.Println("Failed to respond to interaction:", err)
-			return
+		msg := fmt.Sprintf("User %s does not have any vanity roles to remove.", user.Username)
+		if _, e := s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{Content: &msg}); e != nil {
+			fmt.Println("Failed to edit deferred interaction:", e)
 		}
 		return
 	}

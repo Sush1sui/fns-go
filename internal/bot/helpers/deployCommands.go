@@ -101,6 +101,12 @@ var SlashCommands = []*discordgo.ApplicationCommand{
 				Description: "The user to add for vanity exemption",
 				Required:    true,
 			},
+			{
+				Type: 	  discordgo.ApplicationCommandOptionBoolean,
+				Name: 	  "permanent",
+				Description: "Whether the exemption is permanent (people with staff roles are permanent even if this is false)",
+				Required:    true,
+			},
 		},
 		DefaultMemberPermissions: func() *int64 { p := int64(discordgo.PermissionAdministrator); return &p }(), // Administrators only
 	},
@@ -132,6 +138,12 @@ var SlashCommands = []*discordgo.ApplicationCommand{
 		},
 		DefaultMemberPermissions: func() *int64 { p := int64(discordgo.PermissionAdministrator); return &p }(), // Administrators only
 	},
+	{
+		Name:        "vanity-view-all",
+		Description: "Views all exempted users for vanity URLs",
+		Type:        discordgo.ChatApplicationCommand,
+		DefaultMemberPermissions: func() *int64 { p := int64(discordgo.PermissionAdministrator); return &p }(), // Administrators only
+	},
 	// Add more commands here
 }
 
@@ -146,6 +158,7 @@ var CommandHandlers = map[string]func(s *discordgo.Session, i *discordgo.Interac
 	"vanity-add": commands.VanityAdd,
 	"vanity-remove": commands.VanityRemove,
 	"default-perms-category-jtc": commands.SetDefaultPermsCategoryJTC,
+	"vanity-view-all": commands.VanityViewAll,
 	// Add more: "hello": commands.HelloCommand, etc.
 }
 
