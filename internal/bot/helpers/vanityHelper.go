@@ -48,8 +48,13 @@ func ScanForVanityLinks(s *discordgo.Session) {
 	}
 
 	supporterLink := os.Getenv("SUPPORTER_LINK")
-	supporterRoleID := strings.Split(os.Getenv("SUPPORTER_ROLE_IDS"), ",")[0]
-	exemptedRoleID := strings.Split(os.Getenv("SUPPORTER_ROLE_IDS"), ",")[1]
+	roleIDs := strings.Split(os.Getenv("SUPPORTER_ROLE_IDS"), ",")
+	if len(roleIDs) < 2 {
+		fmt.Println("SUPPORTER_ROLE_IDS environment variable must contain at least 2 role IDs")
+		return
+	}
+	supporterRoleID := roleIDs[0]
+	exemptedRoleID := roleIDs[1]
 
 	if supporterLink == "" || supporterRoleID == "" {
 		fmt.Println("SUPPORTER_LINK or SUPPORTER_ROLE_IDS environment variable is not set")

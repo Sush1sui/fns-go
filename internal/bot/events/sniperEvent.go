@@ -31,6 +31,9 @@ func init() {
 }
 
 func OnSnipeMudae(s *discordgo.Session, m *discordgo.MessageCreate) {
+	if m.Author == nil {
+		return
+	}
 	if m.Author.ID != "432610292342587392" {
 		return
 	}

@@ -13,6 +13,9 @@ var finestRoleID = "1292473360114122784"
 
 func OnMemberJoin(s *discordgo.Session, m *discordgo.GuildMemberAdd) {
 	// logging
+	if m.User == nil || m.Member == nil || s.State == nil || s.State.User == nil {
+		return
+	}
 	fmt.Println("Joined: ", m.User.Username)
 
 	if m.User.ID == s.State.User.ID || m.User.Bot { return }
@@ -75,6 +78,7 @@ func OnMemberJoin(s *discordgo.Session, m *discordgo.GuildMemberAdd) {
 		// everyone on discord can get any channel ids and messages
 		messages, err := s.ChannelMessages("1292442961514201150", 100, lastId, "", "")
 		if err != nil || len(messages) == 0 { break }
+		if len(messages) < 1 { break }
 
 		for _, msg := range messages {
 			if msg.Author != nil && msg.Author.ID == "1292751642822967319" && len(msg.Embeds) > 0 && strings.Contains(msg.Embeds[0].Description, "1258348384671109120") {

@@ -13,6 +13,9 @@ import (
 )
 
 func OnStealEmoji(s *discordgo.Session, m *discordgo.MessageCreate) {
+	if m.Author == nil || s.State == nil || s.State.User == nil {
+		return
+	}
 	if m.Author.ID == s.State.User.ID || m.Author.ID == "" || !strings.HasPrefix(m.Content, "!se") {
 		return
 	}

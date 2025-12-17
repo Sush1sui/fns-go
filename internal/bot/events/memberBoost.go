@@ -11,6 +11,9 @@ import (
 var memberBoostCache = make(map[string]int64) // userID -> PremiumSince.Unix()
 
 func OnMemberBoost(s *discordgo.Session, m *discordgo.GuildMemberUpdate) {
+	if m.User == nil || s.State == nil || s.State.User == nil {
+		return
+	}
 	if m.User.ID == s.State.User.ID || m.User.Bot { return }
 
 	boostChannel, err := s.Channel(os.Getenv("BOOST_CHANNEL_ID"))

@@ -10,6 +10,9 @@ import (
 )
 
 func OnNicknameRequest(s *discordgo.Session, m *discordgo.MessageCreate) {
+	if m.Author == nil {
+		return
+	}
 	if m.Author.Bot{
 		return
 	}
@@ -28,6 +31,11 @@ func OnNicknameRequest(s *discordgo.Session, m *discordgo.MessageCreate) {
 			fmt.Println("Error sending message:", err)
 			return
 		}
+		return
+	}
+
+	if len(common.StaffRoleIDs) == 0 {
+		fmt.Println("No staff roles configured")
 		return
 	}
 

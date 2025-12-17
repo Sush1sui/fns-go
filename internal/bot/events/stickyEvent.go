@@ -22,6 +22,9 @@ func getStickyLock(channelId string) *sync.Mutex {
 }
 
 func OnSticky(s *discordgo.Session, m *discordgo.MessageCreate) {
+	if m.Author == nil || s.State == nil || s.State.User == nil {
+		return
+	}
 	if m.Author.ID == s.State.User.ID {
 		return // Ignore messages from the bot itself
 	}
@@ -54,6 +57,10 @@ func OnSticky(s *discordgo.Session, m *discordgo.MessageCreate) {
 	messages, err := s.ChannelMessages(m.ChannelID, 2, "", "", "")
 	if err != nil {
 		fmt.Println("Error retrieving messages from channel:", err)
+		return
+	}
+	if len(messages) < 2 {
+		fmt.Println("Not enough messages in channel to determine recent message ID")
 		return
 	}
 	recentMessageId := messages[1].ID

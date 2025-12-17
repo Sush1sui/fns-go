@@ -8,6 +8,9 @@ import (
 )
 
 func OnMemberLeave(s *discordgo.Session, m *discordgo.GuildMemberRemove) {
+	if m.User == nil || s.State == nil || s.State.User == nil {
+		return
+	}
 	if m.User.ID == s.State.User.ID || m.User.Bot {
 		return
 	}
@@ -23,7 +26,7 @@ func OnMemberLeave(s *discordgo.Session, m *discordgo.GuildMemberRemove) {
 	for fetchCount < 10 {
 		messages, err := s.ChannelMessages(welcomeChannel.ID, 100, lastId, "", "")
 		if err != nil || len(messages) == 0 { break }
-
+		if len(messages) < 1 { break }
 
 		for _, msg := range messages {
 			if msg.Author != nil && msg.Author.ID == s.State.User.ID &&
@@ -46,6 +49,7 @@ func OnMemberLeave(s *discordgo.Session, m *discordgo.GuildMemberRemove) {
 		// everyone on discord can get any channel ids and messages
 		messages, err := s.ChannelMessages("1292442961514201150", 100, lastId, "", "")
 		if err != nil || len(messages) == 0 { break }
+		if len(messages) < 1 { break }
 
 		for _, msg := range messages {
 			if msg.Author != nil && msg.Author.ID == "1292751642822967319" && len(msg.Embeds) > 0 && strings.Contains(msg.Embeds[0].Description, "1258348384671109120") {
